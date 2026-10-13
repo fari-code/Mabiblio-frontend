@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+
+  /* Couleurs principales */
+  --color-primary: #1e3a8a;          /* Bleu Nuit / Encre */
+  --color-primary-hover: #172554;
+  --color-secondary: #059669;        /* Vert Émeraude */
+
+  /* Couleurs de statut pour MaBiblio */
+  --color-status-attente: #f59e0b;   /* Ambre */
+  --color-status-cours: #2563eb;     /* Bleu */
+  --color-status-signale: #9333ea;   /* Violet */
+  --color-status-retourne: #059669;  /* Vert */
+  --color-status-refuse: #e11d48;    /* Rouge */
+}
