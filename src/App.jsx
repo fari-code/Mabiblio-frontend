@@ -1,15 +1,18 @@
 import "./App.css";
-import DashboardAdherent from "./pages/DashboardAdherent";
-
+import Login from "./pages/Login";
+import { Routes, Route } from 'react-router-dom';
 // import DashboardAdherent from "./pages/DashboardAdherent";
 // import DashboardBibliothecaire from "./pages/DashboardBibliothecaire";
-// import Home from "./pages/Home";
+import Home from "./pages/Home";
 // import Login from "./pages/Login";
 
 function App() {
   return (
     <>
-      <DashboardAdherent />
+     <Routes>
+      <Route path="/" element={<Home/>}/>
+      <Route path="/login" element={<Login />} />
+    </Routes>
     </>
   );
 }

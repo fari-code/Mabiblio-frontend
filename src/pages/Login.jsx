@@ -1,22 +1,46 @@
-import { useState } from 'react';
-import Navbar from '../components/Navbar';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import api from "../api/axios";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    setLoading(true);
 
-    // Simulation de connexion (sera relié à l'API Laravel plus tard)
-    if (!email || !password) {
-      setError('Veuillez remplir tous les champs.');
-      return;
+    try {
+      const response = await api.post("/login", {
+        email,
+        password,
+      });
+
+      // Stockage du token et des informations utilisateur
+      localStorage.setItem("auth_token", response.data.access_token);
+
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // Redirection selon le rôle
+      if (response.data.user.role === "BIBLIOTHECAIRE") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/adherent/dashboard");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Une erreur est survenue lors de la connexion.",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    alert(`Connexion tentée avec l'email : ${email}`);
   };
 
   return (
@@ -26,7 +50,6 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
           <div className="text-center space-y-2">
-            {/* Conteneur unique pour l'icône */}
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-md shadow-primary/20">
               <svg
                 className="h-7 w-7"
@@ -42,14 +65,30 @@ export default function Login() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight pt-2">Connexion à MaBiblio</h2>
-            <p className="text-sm text-gray-500">Accédez à votre espace adhérent ou bibliothécaire</p>
+
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight pt-2">
+              Connexion à MaBiblio
+            </h2>
+
+            <p className="text-sm text-gray-500">
+              Accédez à votre espace adhérent ou bibliothécaire
+            </p>
           </div>
 
           {error && (
             <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="w-5 h-5 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
               <span>{error}</span>
             </div>
@@ -57,42 +96,58 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1"
+              >
                 Adresse email
               </label>
+
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="exemple@domaine.com"
+                required
+                autoComplete="email"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1"
+              >
                 Mot de passe
               </label>
+
               <input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                required
+                autoComplete="current-password"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-md shadow-primary/20 text-sm mt-2"
+              disabled={loading}
+              className="w-full py-3.5 bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md shadow-primary/20 text-sm mt-2"
             >
-              Se connecter
+              {loading ? "Connexion en cours..." : "Se connecter"}
             </button>
           </form>
 
           <div className="text-center pt-2 border-t border-gray-50">
             <p className="text-xs text-gray-500">
-              Pas encore de compte ? Contactez le bibliothécaire pour créer votre accès adhérent.
+              Pas encore de compte ? Contactez le bibliothécaire pour créer
+              votre accès adhérent.
             </p>
           </div>
         </div>
