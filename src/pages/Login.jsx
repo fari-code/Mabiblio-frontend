@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,17 +17,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await api.post("/login", {
-        email,
-        password,
-      });
+      const response = await api.post("/login", { email, password });
 
-      // Stockage du token et des informations utilisateur
       localStorage.setItem("auth_token", response.data.access_token);
-
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Redirection selon le rôle
       if (response.data.user.role === "BIBLIOTHECAIRE") {
         navigate("/admin/dashboard");
       } else {
@@ -44,111 +38,208 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Navbar user={null} />
+    <div className="min-h-screen flex bg-white font-sans overflow-hidden">
+      {/* ================= PARTIE GAUCHE : ANIMATION 3D & PARTICULES ================= */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[var(--color-primary)] overflow-hidden">
+        {/* Image de fond avec effet de zoom lent */}
+        <img
+          src="https://images.unsplash.com/photo-1550399105-c4db5fb85c18?q=80&w=1500&auto=format&fit=crop"
+          alt="Bibliothèque moderne 3D"
+          className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay animate-slow-zoom"
+        />
 
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-md shadow-primary/20">
-              <svg
-                className="h-7 w-7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                />
-              </svg>
-            </div>
+        {/* Dégradé pour la lisibilité et l'effet de profondeur */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-primary)] via-[var(--color-primary)]/70 to-transparent"></div>
 
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight pt-2">
-              Connexion à MaBiblio
+        {/* --- PARTICULES LUMINEUSES ANIMÉES (CSS) --- */}
+        <div className="absolute inset-0 z-0">
+          <div
+            className="particle w-2 h-2 left-[10%] top-[80%]"
+            style={{ animationDelay: "0s", animationDuration: "8s" }}
+          ></div>
+          <div
+            className="particle w-3 h-3 left-[30%] top-[90%]"
+            style={{ animationDelay: "2s", animationDuration: "10s" }}
+          ></div>
+          <div
+            className="particle w-1.5 h-1.5 left-[50%] top-[70%]"
+            style={{ animationDelay: "4s", animationDuration: "7s" }}
+          ></div>
+          <div
+            className="particle w-2.5 h-2.5 left-[70%] top-[85%]"
+            style={{ animationDelay: "1s", animationDuration: "9s" }}
+          ></div>
+          <div
+            className="particle w-1 h-1 left-[85%] top-[60%]"
+            style={{ animationDelay: "3s", animationDuration: "11s" }}
+          ></div>
+          <div
+            className="particle w-2 h-2 left-[40%] top-[95%]"
+            style={{ animationDelay: "5s", animationDuration: "8s" }}
+          ></div>
+        </div>
+
+        {/* Contenu texte sur l'image (SANS le logo en haut) */}
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white w-full">
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 animate-fade-in-up">
+            L'accès à votre <br />
+            <span className="text-[var(--color-status-attente)]">
+              bibliothèque
+            </span>{" "}
+            <br />
+            en toute sécurité.
+          </h1>
+          <p className="text-blue-100 text-lg max-w-md animate-fade-in-up delay-200">
+            Connectez-vous pour gérer vos emprunts, découvrir de nouveaux
+            ouvrages et explorer notre catalogue.
+          </p>
+        </div>
+      </div>
+
+      {/* ================= PARTIE DROITE : FORMULAIRE ================= */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-10 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          {/* En-tête mobile (Logo visible seulement sur petit écran) */}
+          <div className="text-center lg:text-left">
+            <Link
+              to="/"
+              className="inline-flex lg:hidden items-center space-x-2 mb-8 text-[var(--color-primary)]"
+            >
+              <span className="text-2xl font-extrabold tracking-tight">
+                MaBiblio
+              </span>
+            </Link>
+
+            <h2 className="text-3xl font-extrabold text-[var(--color-text-main)] tracking-tight">
+              Bon retour !
             </h2>
-
-            <p className="text-sm text-gray-500">
-              Accédez à votre espace adhérent ou bibliothécaire
+            <p className="text-sm text-[var(--color-text-muted)] mt-2">
+              Veuillez vous connecter à votre compte pour continuer.
             </p>
           </div>
 
+          {/* Message d'erreur */}
           {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-              <svg
-                className="w-5 h-5 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
+            <div className="bg-[var(--color-status-refuse)]/10 border border-[var(--color-status-refuse)]/20 text-[var(--color-status-refuse)] text-sm px-4 py-3 rounded-xl flex items-center gap-2 animate-[fadeInUp_0.3s_ease-out]">
+              <i className="fas fa-exclamation-triangle w-5 text-center"></i>
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Champ Email */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1"
+                className="block text-sm font-semibold text-[var(--color-text-main)] mb-1.5"
               >
                 Adresse email
               </label>
-
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="exemple@domaine.com"
-                required
-                autoComplete="email"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)]">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
+                  </svg>
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="exemple@domaine.com"
+                  required
+                  autoComplete="email"
+                  className="w-full pl-11 pr-4 py-3.5 bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:bg-white transition-all"
+                />
+              </div>
             </div>
 
+            {/* Champ Mot de passe */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1"
-              >
-                Mot de passe
-              </label>
-
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
-              />
+              <div className="flex justify-between items-center mb-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-[var(--color-text-main)]"
+                >
+                  Mot de passe
+                </label>
+                <a
+                  href="#"
+                  className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                >
+                  Oublié ?
+                </a>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)]">
+                  <i className="fas fa-lock text-lg"></i>
+                </div>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  className="w-full pl-11 pr-12 py-3.5 bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:bg-white transition-all"
+                />
+                {/* Bouton Afficher/Masquer le mot de passe */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                >
+                  <i
+                    className={`far ${showPassword ? "fa-eye-slash" : "fa-eye"} text-lg`}
+                  ></i>
+                </button>
+              </div>
             </div>
 
+            {/* Bouton de soumission */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md shadow-primary/20 text-sm mt-2"
+              className="w-full py-3.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-[var(--color-primary)]/20 text-sm mt-4 active:scale-[0.98] flex justify-center items-center gap-2"
             >
-              {loading ? "Connexion en cours..." : "Se connecter"}
+              {loading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  Connexion en cours...
+                </>
+              ) : (
+                "Se connecter"
+              )}
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-gray-50">
-            <p className="text-xs text-gray-500">
-              Pas encore de compte ? Contactez le bibliothécaire pour créer
-              votre accès adhérent.
+          {/* Pied de page du formulaire */}
+          <div className="text-center pt-6 border-t border-[var(--color-border)]">
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Pas encore de compte ?{" "}
+              <span className="font-semibold text-[var(--color-text-main)]">
+                Contactez le bibliothécaire
+              </span>{" "}
+              pour créer votre accès.
             </p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 mt-4 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              <i className="fas fa-arrow-left"></i> Retour à l'accueil
+            </Link>
           </div>
         </div>
       </div>

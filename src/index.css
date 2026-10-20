@@ -1,17 +1,95 @@
 @import "tailwindcss";
 
 @theme {
+  /* --- Typographie --- */
   --font-sans: 'Inter', sans-serif;
 
-  /* Couleurs principales */
+  /* --- Couleurs de marque --- */
   --color-primary: #1e3a8a;          /* Bleu Nuit / Encre */
   --color-primary-hover: #172554;
-  --color-secondary: #059669;        /* Vert Émeraude */
+  --color-secondary: #0d9488;        /* Teal (pour différencier du vert de succès) */
+  --color-secondary-hover: #0f766e;
 
-  /* Couleurs de statut pour MaBiblio */
-  --color-status-attente: #f59e0b;   /* Ambre */
-  --color-status-cours: #2563eb;     /* Bleu */
-  --color-status-signale: #9333ea;   /* Violet */
-  --color-status-retourne: #059669;  /* Vert */
-  --color-status-refuse: #e11d48;    /* Rouge */
+  /* --- Couleurs de statut (Cycle de vie de l'emprunt) --- */
+  --color-status-attente: #f59e0b;   /* Ambre - En attente */
+  --color-status-cours: #2563eb;     /* Bleu - En cours */
+  --color-status-signale: #9333ea;   /* Violet - Retour signalé */
+  --color-status-retourne: #059669;  /* Vert - Retourné (Succès) */
+  --color-status-refuse: #e11d48;    /* Rouge/Rose - Refusé (Danger) */
+
+  /* --- NOUVEAU : Surfaces et Neutres (Indispensable pour les tableaux) --- */
+  --color-bg-base: #f8fafc;          /* Gris très clair pour le fond de page */
+  --color-surface: #ffffff;          /* Blanc pur pour les cartes et tableaux */
+  --color-text-main: #0f172a;        /* Gris très foncé pour les titres */
+  --color-text-muted: #64748b;       /* Gris moyen pour les textes secondaires */
+  --color-border: #e2e8f0;           /* Gris clair pour les bordures */
+  
+  /* --- Danger (Pour SweetAlert2) --- */
+  --color-danger: #e11d48;
+}
+
+/* --- Styles de base recommandés --- */
+@layer base {
+  body {
+    /* Applique le fond gris clair et la police Inter partout */
+    @apply bg-[var(--color-bg-base)] text-[var(--color-text-main)] antialiased;
+  }
+  
+  /* Améliore le rendu des tableaux (très important pour le bibliothécaire) */
+  table {
+    @apply w-full text-left border-collapse;
+  }
+  th {
+    @apply font-semibold text-[var(--color-text-muted)] uppercase text-xs tracking-wider border-b border-[var(--color-border)] pb-3;
+  }
+  td {
+    @apply border-b border-[var(--color-border)] py-4;
+  }
+}
+/* --- Animations pour la page d'accueil --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.25s; }
+  .delay-300 { animation-delay: 0.4s; }
+}
+
+/* --- Animations pour la page Login --- */
+@keyframes slowZoom {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-200px) scale(0); opacity: 0; }
+}
+
+.animate-slow-zoom {
+  animation: slowZoom 25s ease-in-out infinite;
+}
+
+.particle {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.6);
+  animation: floatUp linear infinite;
+  pointer-events: none;
 }
