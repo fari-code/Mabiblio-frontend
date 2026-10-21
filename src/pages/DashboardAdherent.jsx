@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Pour la déconnexion
 
 // --- COMPOSANT : COMPTEUR ANIMÉ ---
-// Permet de faire défiler les chiffres de 0 à la valeur cible
 function AnimatedCounter({ value, duration = 1500 }) {
   const [count, setCount] = useState(0);
 
@@ -11,12 +11,11 @@ function AnimatedCounter({ value, duration = 1500 }) {
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      // On arrondit à l'entier inférieur
       setCount(Math.floor(progress * value));
       if (progress < 1) {
         window.requestAnimationFrame(step);
       } else {
-        setCount(value); // Assure la valeur exacte à la fin
+        setCount(value);
       }
     };
     window.requestAnimationFrame(step);
@@ -26,10 +25,10 @@ function AnimatedCounter({ value, duration = 1500 }) {
 }
 
 export default function DashboardAdherent() {
-  // --- ÉTAT DE CHARGEMENT (Skeleton) ---
   const [isLoading, setIsLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // État pour le menu mobile
+  const navigate = useNavigate();
 
-  // --- DONNÉES UTILISATEUR ---
   const [user] = useState({
     prenom: 'Koffi',
     nom: 'Mensah',
@@ -38,15 +37,10 @@ export default function DashboardAdherent() {
     email: 'koffi.mensah@biblio.bj'
   });
 
-  // --- STATISTIQUES ---
   const [stats, setStats] = useState({
-    actifs: 0,
-    enCours: 0,
-    enAttente: 0,
-    retournes: 0
+    actifs: 0, enCours: 0, enAttente: 0, retournes: 0
   });
 
-  // --- EMPRUNTS (Données de test) ---
   const [emprunts, setEmprunts] = useState([
     { id: 1, titre: 'L\'Étranger', auteur: 'Albert Camus', categorie: 'Roman', statut: 'EN_COURS', date_demande: '2026-10-01', date_retour_prevue: '2026-10-22' },
     { id: 2, titre: 'Algorithmique en Python', auteur: 'Thibault Demongodin', categorie: 'Informatique', statut: 'EN_ATTENTE', date_demande: '2026-10-10', date_retour_prevue: null },
@@ -56,112 +50,203 @@ export default function DashboardAdherent() {
 
   const [filtreStatut, setFiltreStatut] = useState('TOUS');
 
-  // --- SIMULATION DE L'APPEL API ---
   useEffect(() => {
     const timer = setTimeout(() => {
-      setStats({
-        actifs: 2,
-        enCours: 1,
-        enAttente: 1,
-        retournes: 3
-      });
-      setIsLoading(false); // On arrête le chargement
-    }, 800); // On simule 800ms de latence réseau
+      setStats({ actifs: 2, enCours: 1, enAttente: 1, retournes: 3 });
+      setIsLoading(false);
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
 
-  // Filtrage de la table
   const empruntsFiltres = emprunts.filter(emp => {
     if (filtreStatut === 'TOUS') return true;
     return emp.statut === filtreStatut;
   });
 
-  // Action : Signaler le retour
   const handleSignalRetour = (id) => {
     setEmprunts(emprunts.map(emp => emp.id === id ? { ...emp, statut: 'RETOUR_SIGNALE' } : emp));
+  };
+
+  // --- ACTION : DÉCONNEXION ---
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Se déconnecter ?',
+      text: "Vous devrez vous reconnecter pour accéder à vos emprunts.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--color-status-refuse)',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Oui, me déconnecter',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      }
+    });
   };
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-base)] flex flex-col font-sans">
       
-      {/* ================= HEADER DU DASHBOARD ================= */}
+      {/* ================= HEADER RESPONSIVE ================= */}
       <header className="bg-white border-b border-[var(--color-border)] sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 cursor-pointer group">
-            <div className="w-11 h-11 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <i className="fas fa-book-open text-xl"></i>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+              <i className="fas fa-book-open text-lg sm:text-xl"></i>
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-[var(--color-text-main)]">
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-[var(--color-text-main)]">
                 Ma<span className="text-[var(--color-status-attente)]">Biblio</span>
               </span>
-              <span className="block text-xs text-[var(--color-text-muted)] font-medium">Espace Adhérent</span>
+              <span className="block text-[10px] sm:text-xs text-[var(--color-text-muted)] font-medium">Espace Adhérent</span>
             </div>
           </Link>
 
-          <div className="flex items-center space-x-6">
-            <Link to="/" className="hidden sm:flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+          {/* --- NAVIGATION DESKTOP --- */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
               <i className="fas fa-search"></i> Catalogue
             </Link>
 
-            <div className="relative group cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 text-[var(--color-primary)] font-bold text-sm flex items-center justify-center group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
-                {user.prenom[0]}{user.nom[0]}
+            <div className="flex items-center space-x-4 pl-6 border-l border-[var(--color-border)]">
+              <div className="text-right">
+                <p className="text-sm font-bold text-[var(--color-text-main)]">{user.prenom} {user.nom}</p>
+                <p className="text-[10px] font-mono text-[var(--color-text-muted)]">{user.numero_carte}</p>
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--color-status-retourne)] border-2 border-white rounded-full" title="En ligne"></span>
+              <div className="relative group cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 text-[var(--color-primary)] font-bold text-sm flex items-center justify-center group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+                  {user.prenom[0]}{user.nom[0]}
+                </div>
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--color-status-retourne)] border-2 border-white rounded-full" title="En ligne"></span>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="ml-2 w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                title="Déconnexion"
+              >
+                <i className="fas fa-sign-out-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          {/* --- BOUTON MENU MOBILE (Hamburger) --- */}
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)} 
+            className="md:hidden p-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-bg-base)] transition-colors"
+          >
+            <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl`}></i>
+          </button>
+        </div>
+
+        {/* --- MENU DÉROULANT MOBILE --- */}
+        <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="px-4 pt-2 pb-6 space-y-4 bg-white border-t border-[var(--color-border)] shadow-inner">
+            
+            {/* Profil Mobile */}
+            <div className="flex items-center space-x-4 px-2 py-2">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-primary)] text-white font-bold text-lg flex items-center justify-center">
+                  {user.prenom[0]}{user.nom[0]}
+                </div>
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--color-status-retourne)] border-2 border-white rounded-full"></span>
+              </div>
+              <div>
+                <p className="text-base font-bold text-[var(--color-text-main)]">{user.prenom} {user.nom}</p>
+                <p className="text-xs font-mono text-[var(--color-text-muted)]">Carte : {user.numero_carte}</p>
+              </div>
+            </div>
+
+            {/* Liens Mobile */}
+            <div className="space-y-1">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[var(--color-text-main)] hover:bg-[var(--color-bg-base)] transition-colors">
+                <i className="fas fa-search text-[var(--color-text-muted)] w-5 text-center"></i> Catalogue
+              </Link>
+              <Link to="/adherent/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+                <i className="fas fa-book-open w-5 text-center"></i> Mes emprunts
+              </Link>
+            </div>
+
+            {/* Bouton Déconnexion Mobile */}
+            <div className="pt-2">
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+              >
+                <i className="fas fa-sign-out-alt"></i> Se déconnecter
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        {/* ================= BANNIÈRE DE BIENVENUE ================= */}
-        <div className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="flex items-center space-x-5 relative z-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl sm:text-3xl shadow-inner">
+        {/* ================= BANNIÈRE DE BIENVENUE ================= */}
+        <div className="relative bg-[#0f172a] rounded-[2rem] p-6 sm:p-10 text-white shadow-2xl overflow-hidden flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+          <div className="absolute top-[-50%] left-[-10%] w-96 h-96 bg-[var(--color-primary)] rounded-full mix-blend-screen filter blur-[80px] opacity-60 pointer-events-none"></div>
+          <div className="absolute bottom-[-50%] right-[10%] w-96 h-96 bg-[#0ea5e9] rounded-full mix-blend-screen filter blur-[80px] opacity-30 pointer-events-none"></div>
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 border-4 border-white/20 shadow-xl flex items-center justify-center text-white font-extrabold text-3xl backdrop-blur-sm shrink-0">
               {user.prenom[0]}{user.nom[0]}
             </div>
-            <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[var(--color-status-retourne)] text-xs font-bold border border-white/15 mb-2">
-                <i className="fas fa-id-card"></i> Carte N° {user.numero_carte}
+            
+            <div className="pt-1">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[#0f172a] text-xs font-bold shadow-sm mb-3">
+                <i className="fas fa-id-card text-[var(--color-primary)]"></i> Carte N° {user.numero_carte}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Bonjour, {user.prenom} {user.nom}
               </h1>
-              <p className="text-blue-100 text-sm mt-1 max-w-md">
+              <p className="text-slate-300 text-sm mt-2 max-w-md">
                 Suivez vos emprunts et gérez vos lectures en toute simplicité.
               </p>
             </div>
           </div>
 
-          {/* Jauge de quota */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-5 rounded-2xl w-full md:w-72 relative z-10">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-bold text-blue-100 uppercase tracking-wider flex items-center gap-2">
-                <i className="fas fa-layer-group"></i> Quota
-              </span>
-              <span className="text-sm font-extrabold text-white">
-                {isLoading ? "-" : stats.actifs} / 5 max
-              </span>
+          <div className="relative z-10 w-full lg:w-80 shrink-0">
+            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-lg">
+              <div className="flex justify-between items-end mb-4">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest block mb-1">
+                    Quota d'emprunts
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-extrabold text-white">
+                      {isLoading ? "-" : stats.actifs}
+                    </span>
+                    <span className="text-sm font-medium text-slate-400">/ 5 max</span>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                  <i className="fas fa-layer-group text-white"></i>
+                </div>
+              </div>
+              
+              <div className="w-full bg-black/40 h-3 rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className="bg-gradient-to-r from-[var(--color-status-attente)] to-amber-300 h-full rounded-full transition-all duration-1000 ease-out relative" 
+                  style={{ width: isLoading ? '0%' : `${(stats.actifs / 5) * 100}%` }}
+                >
+                  <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/30 blur-[2px]"></div>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400 mt-3 text-right font-medium">
+                Limite simultanée autorisée
+              </p>
             </div>
-            <div className="w-full bg-black/30 h-2.5 rounded-full overflow-hidden">
-              <div 
-                className="bg-[var(--color-status-attente)] h-full rounded-full transition-all duration-1000 ease-out" 
-                style={{ width: isLoading ? '0%' : `${(stats.actifs / 5) * 100}%` }}
-              ></div>
-            </div>
-            <p className="text-[10px] text-blue-200 mt-2 text-right">Emprunts simultanés autorisés</p>
           </div>
         </div>
 
-        {/* ================= GRILLE DES KPI (STATISTIQUES) ================= */}
+        {/* ================= GRILLE DES KPI ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {isLoading ? (
-            // --- SKELETON LOADER POUR LES CARTES ---
             [...Array(4)].map((_, i) => (
               <div key={i} className="bg-white p-6 rounded-2xl border border-[var(--color-border)] shadow-sm animate-pulse flex items-center justify-between">
                 <div className="space-y-3 w-full">
@@ -172,7 +257,6 @@ export default function DashboardAdherent() {
               </div>
             ))
           ) : (
-            // --- VRAIES DONNÉES AVEC COMPTEUR ANIMÉ ---
             <>
               <div className="bg-white p-6 rounded-2xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group">
                 <div>
@@ -227,7 +311,6 @@ export default function DashboardAdherent() {
 
         {/* ================= TABLEAU DES EMPRUNTS ================= */}
         <div className="bg-white rounded-3xl border border-[var(--color-border)] shadow-sm overflow-hidden">
-          
           <div className="p-6 sm:p-8 border-b border-[var(--color-border)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h3 className="text-xl font-bold text-[var(--color-text-main)] flex items-center gap-2">
@@ -271,15 +354,10 @@ export default function DashboardAdherent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)] text-sm text-[var(--color-text-main)]">
-                
-                {/* --- SKELETON LOADER POUR LE TABLEAU --- */}
                 {isLoading ? (
                   [...Array(4)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="py-4 px-6">
-                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </td>
+                      <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div><div className="h-3 bg-gray-200 rounded w-1/2"></div></td>
                       <td className="py-4 px-6"><div className="h-6 bg-gray-200 rounded-lg w-20"></div></td>
                       <td className="py-4 px-6"><div className="h-6 bg-gray-200 rounded-full w-28"></div></td>
                       <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
@@ -288,13 +366,10 @@ export default function DashboardAdherent() {
                     </tr>
                   ))
                 ) : empruntsFiltres.length > 0 ? (
-                  // --- VRAIES DONNÉES DU TABLEAU ---
                   empruntsFiltres.map((emp) => (
                     <tr key={emp.id} className="hover:bg-[var(--color-bg-base)] transition-colors group">
                       <td className="py-4 px-6">
-                        <div className="font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors">
-                          {emp.titre}
-                        </div>
+                        <div className="font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-primary)] transition-colors">{emp.titre}</div>
                         <div className="text-xs text-[var(--color-text-muted)] mt-0.5">Par {emp.auteur}</div>
                       </td>
                       <td className="py-4 px-6">
@@ -324,18 +399,13 @@ export default function DashboardAdherent() {
                           </span>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-[var(--color-text-muted)] font-mono text-xs">
-                        {emp.date_demande}
-                      </td>
+                      <td className="py-4 px-6 text-[var(--color-text-muted)] font-mono text-xs">{emp.date_demande}</td>
                       <td className="py-4 px-6 text-[var(--color-text-muted)] font-mono text-xs">
                         {emp.date_retour_prevue || <span className="text-[var(--color-text-muted)] italic opacity-60">Non défini</span>}
                       </td>
                       <td className="py-4 px-6 text-right">
                         {emp.statut === 'EN_COURS' && (
-                          <button
-                            onClick={() => handleSignalRetour(emp.id)}
-                            className="inline-flex items-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
-                          >
+                          <button onClick={() => handleSignalRetour(emp.id)} className="inline-flex items-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
                             <i className="fas fa-undo"></i> Signaler le retour
                           </button>
                         )}
