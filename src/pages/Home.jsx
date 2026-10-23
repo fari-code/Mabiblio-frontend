@@ -240,7 +240,7 @@ export default function Home() {
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight drop-shadow-lg mb-4">
 
-              Bienvenue à <span className="text-status-attente">MaBiblio</span>
+              Bienvenue à <span className="text-status-attente font-logo">MaBiblio</span>
 
             </h1>
 

@@ -1,17 +1,25 @@
 import "./App.css";
+
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import { Routes, Route } from "react-router-dom";
-// import DashboardAdherent from "./pages/DashboardAdherent";
-// import DashboardBibliothecaire from "./pages/DashboardBibliothecaire";
+import DashboardAdherent from "./pages/DashboardAdherent";
+import DashboardBibliothecaire from "./pages/DashboardBibliothecaire";
 import Home from "./pages/Home";
-// import Login from "./pages/Login";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* Route publique */}
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
+
+        {/* Routes protégées (Simples redirections basées sur le rôle stocké) */}
+        <Route path="/adherent/dashboard" element={<DashboardAdherent />} />
+        <Route path="/admin/dashboard" element={<DashboardBibliothecaire />} />
+
+        {/* Redirection par défaut vers le login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </>
   );

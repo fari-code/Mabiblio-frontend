@@ -57,7 +57,7 @@ export default function Navbar({ user, onLogout }) {
             <div>
               <span className="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
                 Ma
-                <span className="text-status-attente">Biblio</span>
+                <span className="text-status-attente font-logo">Biblio</span>
               </span>
             </div>
           </a>

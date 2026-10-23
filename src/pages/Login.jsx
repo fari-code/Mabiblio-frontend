@@ -36,7 +36,7 @@ export default function Login() {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex bg-white font-sans overflow-hidden">
       {/* ================= PARTIE GAUCHE : ANIMATION 3D & PARTICULES ================= */}

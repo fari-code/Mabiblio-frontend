@@ -3,6 +3,8 @@
 @theme {
   /* --- Typographie --- */
   --font-sans: 'Inter', sans-serif;
+  --font-logo:"Nunito", sans-serif;
+  --font-poppins:"Poppins", sans-serif;
 
   /* --- Couleurs de marque --- */
   --color-primary: #1e3a8a;          /* Bleu Nuit / Encre */
